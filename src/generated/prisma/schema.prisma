@@ -1,0 +1,218 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  name     String   @unique @db.VarChar(255)
+  email    String   @unique @db.VarChar(255)
+  isMember Boolean  @default(false)
+  role     UserRole
+
+  // Optional: Add createdAt and updatedAt timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
+model StudyMaterial {
+  id              Int    @id @default(autoincrement())
+  cId             String
+  studyType       String @db.VarChar(255)
+  topic           String @db.Text
+  difficultyLevel String @default("Easy")
+  status          String @default("Generating") // New field for status
+  courseLayout    Json
+  createdBy       String @db.VarChar(255)
+
+  // Optional: Add createdAt and updatedAt timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
+model Course {
+  id          String  @id @default(uuid())
+  userId      String
+  title       String  @db.Text
+  description String? @default("") @db.Text
+  imageUrl    String? @db.Text
+  price       Float?
+  isPublished Boolean @default(false)
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  chapters    Chapter[]
+  attachments Attachment[]
+  purchases   Purchase[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // user         User          @relation("TeacherCourses", fields: [userId], references: [id])
+
+  @@index([categoryId])
+  @@index([title])
+  @@index([isPublished])
+}
+
+model Category {
+  id      String   @id @default(uuid())
+  name    String
+  courses Course[]
+}
+
+model Attachment {
+  id   String @id @default(uuid())
+  name String
+  url  String @db.Text
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+}
+
+model Chapter {
+  id          String  @id @default(uuid())
+  title       String
+  description String? @default("") @db.Text
+  videoUrl    String? @default("") @db.Text
+  position    Int
+  isPublished Boolean @default(false)
+  isFree      Boolean @default(false)
+
+  muxData MuxData?
+  quiz    Quiz?    @relation
+  quizId  String?  @unique
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  userProgress UserProgress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([isPublished])
+}
+
+model Quiz {
+  id          String     @id @default(uuid())
+  title       String     @default("Chapter Quiz")
+  description String?
+  chapter     Chapter    @relation(fields: [chapterId], references: [id])
+  chapterId   String     @unique
+  questions   Question[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt()
+
+  @@index([chapterId])
+}
+
+model MuxData {
+  id         String  @id @default(uuid())
+  assetId    String
+  playbackId String?
+
+  chapterId String  @unique
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+}
+
+model Question {
+  id            String   @id @default(uuid())
+  quiz          Quiz     @relation(fields: [quizId], references: [id])
+  quizId        String
+  text          String
+  questionType  String   @default("multiple_choice") // "multiple_choice", "true_false", "short_answer"
+  points        Int      @default(1)
+  position      Int      @default(0)
+  options       Option[]
+  correctAnswer String
+  explanation   String? // Explanation for correct answer
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt()
+
+  @@index([quizId])
+  @@index([position])
+}
+
+model Option {
+  id         String   @id @default(uuid())
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId String
+  text       String
+  isCorrect  Boolean  @default(false)
+  position   Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
+
+  @@index([questionId])
+}
+
+model UserProgress {
+  id            String    @id @default(uuid())
+  userId        String
+  chapter       Chapter   @relation(fields: [chapterId], references: [id])
+  chapterId     String
+  quizScore     Float?
+  isCompleted   Boolean   @default(false)
+  attempts      Int       @default(0)
+  bestScore     Float?
+  lastAttemptAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt()
+
+  @@unique([userId, chapterId])
+  @@index([userId])
+  @@index([chapterId])
+  @@index([isCompleted])
+}
+
+model Purchase {
+  id       String @id @default(uuid())
+  userId   String
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // user       User      @relation("StudentPurchases", fields: [userId], references: [id])
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+}
+
+model StripeCustomer {
+  id             String @id
+  userId         String
+  stripeCustomer String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TeacherQualification {
+  id        String   @id @default(uuid())
+  userId    String
+  fileUrl   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
