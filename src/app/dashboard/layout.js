@@ -1,6 +1,13 @@
+import { useEffect } from "react";
 import { Navbar } from "./_components/navbar";
 import { Sidebar } from "./_components/sidebar";
 const DashboardLayout = ({ children }) => {
+
+       useEffect(() => {
+       fetch("/api/auth/status")
+         .then(res => res.json())
+     }, []);
+
     return (
         <div className="h-full">
             <div className="h-[80px] md:pl-56 fixed inset-y-0 w-full z-50">
