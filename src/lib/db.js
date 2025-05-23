@@ -1,16 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
-let db;
+const globalForPrisma = globalThis;
 
-if (typeof globalThis.prisma === 'undefined') {
-  db = new PrismaClient();
+const db = globalForPrisma.prisma ?? new PrismaClient();
 
-  // In development, store the Prisma client globally to prevent re-initializing
-  if (process.env.NODE_ENV !== 'production') {
-    globalThis.prisma = db;
-  }
-} else {
-  db = globalThis.prisma;
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = db;
 }
 
 export { db };

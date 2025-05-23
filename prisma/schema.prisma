@@ -1,6 +1,11 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
   provider = "prisma-client-js"
-  output   = "./node_modules/.prisma/client" 
   previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
@@ -17,40 +22,53 @@ enum UserRole {
 
 model User {
   id            String    @id @default(cuid())
-  userId        String    @unique // Clerk user ID
-  email         String    @unique
+  clerkId       String    @unique
   name          String?
+  email         String    @unique
   role          UserRole  @default(STUDENT)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   courses       Course[]  @relation("CourseTeacher")
   enrolledCourses Course[] @relation("EnrolledStudents")
+
+  @@index([clerkId])
 }
 
 model StudyMaterial {
   id           Int      @id @default(autoincrement())
-  cId     String   
-  studyType   String   @db.VarChar(255)
+  cId          String   
+  studyType    String   @db.VarChar(255)
   topic        String   @db.Text
   difficultyLevel String @default("Easy")
-  status       String   @default("Generating") // New field for status
+  status       String   @default("Generating")
   courseLayout Json
   createdBy    String   @db.VarChar(255)
-
-  // Optional: Add createdAt and updatedAt timestamps
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt()
 }
 
 model Course {
   id          String    @id @default(cuid())
-  title       String
-  description String?
+  title       String    @db.Text
+  description String?   @db.Text @default("")
+  imageUrl    String?   @db.Text
+  price       Float?
+  isPublished Boolean   @default(false)
   teacherId   String
   teacher     User      @relation("CourseTeacher", fields: [teacherId], references: [id])
   students    User[]    @relation("EnrolledStudents")
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  chapters    Chapter[]
+  attachments Attachment[]
+  purchases   Purchase[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  @@index([categoryId])
+  @@index([title])
+  @@index([isPublished])
+  @@index([teacherId])
 }
 
 model Category {
@@ -63,10 +81,8 @@ model Attachment {
   id         String   @id @default(uuid())
   name       String
   url        String   @db.Text
-
   courseId   String
   course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -81,14 +97,11 @@ model Chapter {
   position     Int
   isPublished  Boolean       @default(false)
   isFree       Boolean       @default(false)
-
   muxData      MuxData?
-  quizzes      Quiz[]        // Multiple quizzes per chapter
+  quizzes      Quiz[]
   courseId     String
   course       Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
   userProgress UserProgress[]
-
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
@@ -101,12 +114,12 @@ model Quiz {
   title       String     @default("Chapter Quiz")
   description String?
   chapterId   String
-  chapter     Chapter    @relation(fields: [chapterId], references: [id]) // Relates to Chapter
-  questions   Question[] // Each quiz can have multiple questions
+  chapter     Chapter    @relation(fields: [chapterId], references: [id])
+  questions   Question[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt()
 
-  @@index([chapterId]) // Index for efficient querying
+  @@index([chapterId])
 }
 
 model Question {
@@ -114,12 +127,12 @@ model Question {
   quiz         Quiz     @relation(fields: [quizId], references: [id])
   quizId       String
   text         String
-  questionType String   @default("multiple_choice") // "multiple_choice", "true_false", "short_answer"
+  questionType String   @default("multiple_choice")
   points       Int      @default(1)
   position     Int      @default(0)
   options      Option[]
   correctAnswer String
-  explanation  String?  // Explanation for correct answer
+  explanation  String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt()
 
@@ -144,7 +157,6 @@ model MuxData {
   id         String   @id @default(uuid())
   assetId    String
   playbackId String?
-
   chapterId  String   @unique
   chapter    Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 }
@@ -173,11 +185,8 @@ model Purchase {
   userId     String
   courseId   String
   course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
-  // user       User      @relation("StudentPurchases", fields: [userId], references: [id])
 
   @@unique([userId, courseId])
   @@index([courseId])
@@ -187,7 +196,6 @@ model StripeCustomer {
   id             String   @id
   userId         String
   stripeCustomer String   @unique
-
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
