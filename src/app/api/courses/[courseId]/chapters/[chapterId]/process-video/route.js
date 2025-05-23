@@ -1,8 +1,8 @@
 // app/api/courses/[courseId]/chapters/[chapterId]/process-video/route.js
-import { NextResponse } from 'next/server';
-import mux from '@/lib/mux';
-import { auth } from '@clerk/nextjs';
-import { db } from '@/lib/db';
+import { NextResponse } from "next/server";
+import mux from "@/lib/mux";
+import { auth } from "@clerk/nextjs";
+import { db } from "@/lib/db";
 
 export async function POST(req, { params }) {
   try {
@@ -10,13 +10,30 @@ export async function POST(req, { params }) {
     const { videoUrl } = await req.json();
     const { courseId, chapterId } = params;
 
-    if (!userId) return unauthorizedResponse();
-    
-    // Verify ownership
-    const course = await db.course.findUnique({
-      where: { id: courseId, userId }
+    if (!userId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const user = await db.user.findUnique({
+      where: {
+        clerkId: userId,
+      },
     });
-    if (!course) return unauthorizedResponse();
+
+    if (!user) {
+      return new NextResponse("User not found", { status: 404 });
+    }
+
+    const courseOwner = await db.course.findUnique({
+      where: {
+        id: courseId,
+        teacherId: user.id,
+      },
+    });
+
+    if (!courseOwner) {
+      return new NextResponse("Not found", { status: 404 });
+    }
 
     // Process with Mux
     const asset = await mux.video.assets.create({
@@ -26,7 +43,7 @@ export async function POST(req, { params }) {
     });
 
     if (!asset?.playback_ids?.[0]?.id) {
-      throw new Error('Mux processing failed - no playback ID');
+      throw new Error("Mux processing failed - no playback ID");
     }
 
     // Update database
@@ -40,20 +57,16 @@ export async function POST(req, { params }) {
       update: {
         assetId: asset.id,
         playbackId: asset.playback_ids[0].id,
-      }
+      },
     });
 
     return NextResponse.json({
       success: true,
-      playbackId: asset.playback_ids[0].id
+      playbackId: asset.playback_ids[0].id,
     });
-    
   } catch (error) {
     console.error("[VIDEO_PROCESSING_ERROR]", error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 

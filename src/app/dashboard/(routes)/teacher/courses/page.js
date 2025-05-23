@@ -8,28 +8,36 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 
-
 const CoursesPage = async () => {
-  const {userId}= await auth();
+  const { userId } = await auth();
 
-  if(!userId){
-    return redirect("/dashboard")
-    
-
+  if (!userId) {
+    return redirect("/");
   }
-  console.log("userId:", userId);
-  const courses= await db.course.findMany({
+
+  // First get the user from our database
+  const user = await db.user.findUnique({
     where: {
-        userId,
+      clerkId: userId,
     },
-    orderBy:{
-        createdAt: "desc",
-    }
-  })
+  });
+
+  if (!user) {
+    return redirect("/");
+  }
+
+  const courses = await db.course.findMany({
+    where: {
+      teacherId: user.id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
   return (
     <div className="p-6">
       <DataTable columns={columns} data={courses} />
-      
     </div>
   );
 };

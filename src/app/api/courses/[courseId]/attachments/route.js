@@ -7,20 +7,31 @@ export async function POST(req, { params }) {
   try {
     const { userId } = await auth();
     const { url } = await req.json();
-    const {courseId}= await params;
+    const { courseId } = params;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const courseOwner = await db.course.findUnique({
+    // First get the user from our database
+    const user = await db.user.findUnique({
       where: {
-        id: courseId,
-        userId: userId,
+        clerkId: userId,
       },
     });
 
-    if (!courseOwner) {
+    if (!user) {
+      return new NextResponse("User not found", { status: 404 });
+    }
+
+    const course = await db.course.findUnique({
+      where: {
+        id: courseId,
+        teacherId: user.id,
+      },
+    });
+
+    if (!course) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -32,7 +43,7 @@ export async function POST(req, { params }) {
       },
     });
 
-    return NextResponse.json(attachment); // ✅ Correct usage in JS
+    return NextResponse.json(attachment);
   } catch (error) {
     console.error("COURSE_ID_ATTACHMENTS", error);
     return new NextResponse("Internal Error", { status: 500 });

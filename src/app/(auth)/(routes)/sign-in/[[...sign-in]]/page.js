@@ -20,7 +20,7 @@ export default function SignInPage() {
           }}
           routing="path"
           path="/sign-in"
-          afterSignInUrl="/auth-redirect" // Let middleware handle the redirect
+          afterSignInUrl="/" // Let middleware handle the redirect
           signUpUrl="/sign-up" // Your automatic role-assignment sign-up
         />
       </div>
