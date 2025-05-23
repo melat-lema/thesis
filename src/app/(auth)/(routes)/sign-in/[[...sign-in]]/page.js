@@ -7,12 +7,8 @@ export default function SignInPage() {
     <div className="flex justify-center items-center min-h-screen bg-gray-50 p-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Welcome Back!
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Sign in to continue your learning journey
-          </p>
+          <h1 className="text-2xl font-bold text-gray-800">Welcome Back!</h1>
+          <p className="text-gray-600 mt-2">Sign in to continue your learning journey</p>
         </div>
 
         <SignIn

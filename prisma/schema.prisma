@@ -16,16 +16,17 @@ enum UserRole {
 }
 
 model User {
-  id        Int      @id @default(autoincrement()) // PG auto-increment
-  clerkId   String   @unique // Recommended but optional
-  name      String?
-  email     String   @unique
-  role      UserRole @default(STUDENT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
-
-  @@index([clerkId]) // Add index for faster queries
+  id            String    @id @default(cuid())
+  userId        String    @unique // Clerk user ID
+  email         String    @unique
+  name          String?
+  role          UserRole  @default(STUDENT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  courses       Course[]  @relation("CourseTeacher")
+  enrolledCourses Course[] @relation("EnrolledStudents")
 }
+
 model StudyMaterial {
   id           Int      @id @default(autoincrement())
   cId     String   
@@ -40,29 +41,16 @@ model StudyMaterial {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt()
 }
+
 model Course {
-  id           String        @id @default(uuid())
-  userId       String
-  title        String        @db.Text
-  description  String?       @db.Text @default("")
-  imageUrl     String?       @db.Text
-  price        Float?
-  isPublished  Boolean       @default(false)
-
-  categoryId   String?
-  category     Category?     @relation(fields: [categoryId], references: [id])
-
-  chapters     Chapter[]
-  attachments  Attachment[]
-  purchases    Purchase[]
-
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  // user         User          @relation("TeacherCourses", fields: [userId], references: [id])
-
-  @@index([categoryId])
-  @@index([title])
-  @@index([isPublished])
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  teacherId   String
+  teacher     User      @relation("CourseTeacher", fields: [teacherId], references: [id])
+  students    User[]    @relation("EnrolledStudents")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Category {
@@ -160,9 +148,6 @@ model MuxData {
   chapterId  String   @unique
   chapter    Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 }
-
-
-
 
 model UserProgress {
   id           String   @id @default(uuid())

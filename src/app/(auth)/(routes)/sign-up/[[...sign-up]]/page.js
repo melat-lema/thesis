@@ -1,16 +1,20 @@
-// app/sign-up/page.js
-import { SignUp } from '@clerk/nextjs';
+"use client";
+
+import { SignUp } from "@clerk/nextjs";
+import { useSearchParams } from "next/navigation";
 
 export default function SignUpPage() {
+  const searchParams = useSearchParams();
+  const role = searchParams.get("role") || "student";
   return (
-    <div className="flex justify-center items-center min-h-screen">
+    <div className="flex justify-center items-center min-h-screen w-full">
       <SignUp
-        // Temporary page
         appearance={{
           elements: {
-            formButtonPrimary: 'bg-blue-600 hover:bg-blue-700',
+            formButtonPrimary: "bg-blue-600 hover:bg-blue-700",
           },
         }}
+        afterSignUpUrl={`/after-sign-up?role=${role}`}
       />
     </div>
   );
