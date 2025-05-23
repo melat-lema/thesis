@@ -7,7 +7,7 @@ import Image from "next/image";
 
 export const CourseCard = ({ id, title, imageUrl, chaptersLength, price, progress, category }) => {
   return (
-    <Link href={`/course/${id}`}>
+    <Link href={`/courses/${id}`}>
       <div className="group hover:shadow-sm transition overflow-hidden border rounded-lg p-3 h-full">
         <div className="relative w-full aspect-video rounded-md overflow-hidden bg-slate-100">
           <img className="object-cover" alt={title} src={imageUrl} />
