@@ -3,44 +3,47 @@ import { getProgress } from "./get-progress";
 
 export const getDashboardCourses = async (userId) => {
   try {
-    // You'll implement the logic here to fetch from the DB
-    // Example:
-    // const userCourses = await db.course.findMany(...)
-    const purchasedCourses= await db.purchase.findMany({
-        where:{
-            userId: userId,
+    const purchasedCourses = await db.purchase.findMany({
+      where: {
+        userId,
+      },
+      select: {
+        course: {
+          include: {
+            category: true,
+            chapters: {
+              where: {
+                isPublished: true,
+              },
+            },
+          },
         },
-        select:{
-            course:{
-                include:{
-                    category: true,
-                    chapters:{
-                        where: {
-                            ispublished: true,
-                        }
-                    }
-                }
-            }
-        }
-    })
-    const courses= purchasedCourses.map((purchase)=>purchase.course)
-    for(let course of courses){
-        const progress= await getProgress(userId, course.id);
-        course["progress"]=progress;
-    }
-    const completedCourses=courses.filter((course)=>course.progress==100)
-    const coursesInProgress=courses.filter((course)=>(course.progress ?? 0)<100)
+      },
+    });
+
+    const courses = purchasedCourses.map((purchase) => purchase.course);
+
+    // Create an array of promises to fetch progress for each course concurrently
+    const progressPromises = courses.map(async (course) => {
+      const progress = await getProgress(userId, course.id);
+      return { ...course, progress }; // Create a new object with updated progress
+    });
+
+    // Use Promise.all to wait for all progress requests to complete
+    const coursesWithProgress = await Promise.all(progressPromises);
+
+    const completedCourses = coursesWithProgress.filter((course) => course.progress === 100);
+    const coursesInProgress = coursesWithProgress.filter((course) => (course.progress ?? 0) < 100);
+
     return {
-
-
-      completedCourses: [], // Replace with real data
-      coursesInProgress: [] // Replace with real data
+      completedCourses,
+      coursesInProgress,
     };
   } catch (error) {
     console.log("[GET_DASHBOARD_COURSES]", error);
     return {
       completedCourses: [],
-      coursesInProgress: []
+      coursesInProgress: [],
     };
   }
 };

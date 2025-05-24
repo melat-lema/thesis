@@ -76,8 +76,25 @@ export async function DELETE(req, { params }) {
 export async function PATCH(req, { params }) {
   try {
     const { userId } = await auth();
-    const { isPublished, ...values } = await req.json();
     const { courseId, chapterId } = await params;
+
+    // Get the content type header
+    const contentType = req.headers.get("content-type");
+
+    let values = {};
+    let isPublished;
+
+    // Handle different content types
+    if (contentType?.includes("application/json")) {
+      const jsonData = await req.json();
+      isPublished = jsonData.isPublished;
+      values = { ...jsonData };
+      delete values.isPublished;
+    } else {
+      // If not JSON, treat the body as raw text (for video URL)
+      const text = await req.text();
+      values = { videoUrl: text };
+    }
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });

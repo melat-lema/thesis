@@ -11,8 +11,8 @@ import { ChapterAccessForm } from "./_components/chapter-access-form";
 import { ChapterVideo, ChapterVideoForm } from "./_components/chapter-video-form";
 
 import { ChapterActions } from "./_components/chapter-actions";
-import { Banners } from "@/components/banners";
 import { ChapterQuizForm } from "./_components/chapter-quiz-form";
+import { Banners } from "@/components/Banners";
 
 export default async function ChapterPage({ params }) {
   const { userId } = await auth();

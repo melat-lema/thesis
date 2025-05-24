@@ -1,7 +1,7 @@
 // app/api/courses/[courseId]/chapters/[chapterId]/process-video/route.js
 import { NextResponse } from "next/server";
 import mux from "@/lib/mux";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 
 export async function POST(req, { params }) {

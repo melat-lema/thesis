@@ -24,11 +24,9 @@ export const ChapterVideoForm = ({ initialData, courseId, chapterId }) => {
 
   const onSubmit = async (values) => {
     try {
+      console.log("ON SUBMIT", values);
       setIsLoading(true);
-      const response = await axios.patch(
-        `/api/courses/${courseId}/chapters/${chapterId}`,
-        values
-      );
+      const response = await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}`, values);
 
       const { muxData, chapter } = response.data;
 
@@ -40,7 +38,7 @@ export const ChapterVideoForm = ({ initialData, courseId, chapterId }) => {
       router.refresh();
       console.log("Passing chapterId:", chapterId);
     } catch (error) {
-      console.error(error);
+      console.error("error in chapter video form", error);
       toast.error(error.response?.data?.error || "Something went wrong");
     } finally {
       setIsLoading(false);
@@ -49,16 +47,17 @@ export const ChapterVideoForm = ({ initialData, courseId, chapterId }) => {
 
   const handleFileChange = async (file) => {
     if (!file?.ufsUrl) {
+      console.log("UPLOAD FAILED. NO FILE URL");
       toast.error("Upload failed. Please try again.");
       return;
     }
 
     try {
       setIsLoading(true);
-      
+
       // First update with the video URL
       await onSubmit({ videoUrl: file.ufsUrl });
-      
+
       // Then trigger Mux processing
       const processingResponse = await axios.post(
         `/api/courses/${courseId}/chapters/${chapterId}/process-video`,
@@ -114,9 +113,7 @@ export const ChapterVideoForm = ({ initialData, courseId, chapterId }) => {
                 <p className="mt-2 text-sm">Processing video...</p>
               </div>
             ) : (
-              <p className="text-center text-sm">
-                Video uploaded. Waiting for processing...
-              </p>
+              <p className="text-center text-sm">Video uploaded. Waiting for processing...</p>
             )}
           </div>
         ) : (
@@ -125,19 +122,20 @@ export const ChapterVideoForm = ({ initialData, courseId, chapterId }) => {
           </div>
         )
       ) : (
-        
         <div>
-   <FileUpload
-  endpoint="chapterVideo"
-  onChange={handleFileChange}
-  // options={{
-  //   metadata: { chapterId: chapterId } // Ensure chapterId is included
-  // }}
-  // disabled={isLoading}
-/>
-
-
-
+          <FileUpload
+            endpoint="chapterVideo"
+            onChange={(url) => {
+              console.log("URL", url);
+              if (url) {
+                onSubmit(url);
+              }
+            }}
+            // options={{
+            //   metadata: { chapterId: chapterId } // Ensure chapterId is included
+            // }}
+            // disabled={isLoading}
+          />
 
           <div className="text-xs text-muted-foreground mt-4">
             Upload this chapter's video (Max 512GB). Processing may take a few minutes.

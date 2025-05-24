@@ -10,8 +10,8 @@ import { CategoryForm } from "./_components/category-forM";
 import { PriceForm } from "./_components/price-form";
 import { AttachmentForm } from "./_components/attachment-form";
 import { ChaptersForm } from "./_components/chapters-form";
-import { Banners } from "@/components/banners";
 import { Actions } from "./_components/actions";
+import { Banners } from "@/components/Banners";
 
 export default async function CoursePage({ params: { courseId } }) {
   const { userId } = await auth();

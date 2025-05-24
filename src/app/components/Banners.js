@@ -1,4 +1,4 @@
-export default function Banner() {
+export default function Banners() {
   return (
     <>
       {/* Banner-1 */}
@@ -10,7 +10,8 @@ export default function Banner() {
                 Explore Free Courses
               </h1>
               <p className="text-lg text-gray-800 mb-6">
-                Start your online learning journey at Edu Assist with short-term, in-demand domain courses.
+                Start your online learning journey at Edu Assist with short-term, in-demand domain
+                courses.
               </p>
               <a
                 href="/signup"
@@ -32,10 +33,7 @@ export default function Banner() {
 
       {/* Banner-2 */}
       <div className="py-20 flex justify-center bg-neutral-100">
-        <div
-          className="w-full max-w-7xl bg-cover bg-center px-6 py-16 rounded-xl shadow-lg text-white"
-          
-        >
+        <div className="w-full max-w-7xl bg-cover bg-center px-6 py-16 rounded-xl shadow-lg text-white">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div className="h-[400px] animate__animated animate__fadeInUp">
               <img
@@ -49,7 +47,8 @@ export default function Banner() {
                 Become an Instructor
               </h1>
               <p className="text-lg mb-6 text-black">
-                Share your knowledge globally. Edu Assist gives you all the tools you need to teach what you love.
+                Share your knowledge globally. Edu Assist gives you all the tools you need to teach
+                what you love.
               </p>
               <a
                 href="/instructor"
