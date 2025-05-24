@@ -31,7 +31,7 @@ const CourseSidebar = async ({ course, progressCount }) => {
         )}
       </div>
       <div className="flex flex-col w-full">
-        {course.chapters.map((chapter) => (
+        {/* {course.chapters.map((chapter) => (
           <CourseSidebarItem
             key={chapter.id}
             id={chapter.id}
@@ -40,7 +40,7 @@ const CourseSidebar = async ({ course, progressCount }) => {
             courseId={course.id}
             isLocked={!chapter.isFree && !purchase}
           />
-        ))}
+        ))} */}
       </div>
     </div>
   );

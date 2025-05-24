@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { VideoPlayer } from "./_components/video-player";
 import { CourseEnrollButton } from "./_components/course-enroll-button";
+import { CourseProgressButton } from "./_components/course-progress-button";
 import { Separator } from "@/components/ui/separator";
 import { Preview } from "@/components/preview";
 import { File } from "lucide-react";
@@ -10,6 +11,7 @@ import { Banners } from "@/components/Banners";
 
 const ChapterIdPage = async ({ params }) => {
   const { userId } = await auth();
+  const { courseId, chapterId } = await params;
 
   if (!userId) {
     console.log("No user ID found");
@@ -21,8 +23,8 @@ const ChapterIdPage = async ({ params }) => {
   const { chapter, course, muxData, attachments, nextChapter, userProgress, purchase } =
     await getChapter({
       userId,
-      chapterId: params.chapterId,
-      courseId: params.courseId,
+      chapterId,
+      courseId,
     });
 
   console.log(chapter, course);
@@ -42,9 +44,9 @@ const ChapterIdPage = async ({ params }) => {
       <div className="flex flex-col max-w-4xl mx-auto pb-20">
         <div className="p-4">
           <VideoPlayer
-            chapterId={params.chapterId}
+            chapterId={chapterId}
             title={chapter.title}
-            courseId={params.courseId}
+            courseId={courseId}
             nextChapterId={nextChapter?.id}
             playBackId={muxData?.playBackId}
             isLocked={isLocked}
@@ -55,20 +57,20 @@ const ChapterIdPage = async ({ params }) => {
           <div className="p-4 flex flex-col md:flex-row items-center justify-between">
             <h2 className="text-2xl font-semibold mb-2">{chapter.title}</h2>
             {purchase ? (
-              <CoursesProgressButton
-                chapterId={params.chapterId}
-                courseId={params.courseId}
+              <CourseProgressButton
+                chapterId={chapterId}
+                courseId={courseId}
                 nextChapterId={nextChapter?.id}
                 isCompleted={!!userProgress?.isCompleted}
               />
             ) : (
-              <CourseEnrollButton courseId={params.courseId} price={course.price} />
+              <CourseEnrollButton courseId={courseId} price={course.price} />
             )}
           </div>
           <Separator />
           <div>
             {/* <Preview value={chapter.description} /> */}
-            <p>{chapter.description}</p>
+            <p className="text-xs text-muted-foreground ml-3">{chapter.description}</p>
           </div>
           {!!attachments.length && (
             <>
@@ -85,7 +87,8 @@ const ChapterIdPage = async ({ params }) => {
                     <p className="line-clamp-1">{attachment.name}</p>
                   </a>;
                 })}
-                <Preview value={chapter.description} />
+                {/* <Preview value={chapter.description} /> */}
+                <p className="text-xs text-muted-foreground ml-3">{chapter.description}</p>
               </div>
             </>
           )}
