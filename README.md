@@ -4,6 +4,41 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 First, run the development server:
 
+# ✅ Project Feature Checklist
+
+- [x] **Clerk Role-Based Authentication (Clerk.js)**
+
+- [x] **Student Dashboard Base Setup**
+
+  - [x] Course portal
+  - [x] Payment integration
+  - [ ] Comment and report section
+
+- [x] **Progress Tracking (Student Side)**
+
+- [x] **Chat Feature (Student Side)**
+
+- [ ] **Teacher Dashboard Base**
+
+  - [ ] Chat feature (Teacher side)
+  - [ ] Teacher statistics & progress tracking
+  - [ ] AI feature → Student dashboard
+
+- [ ] **Admin Dashboard Setup**
+
+  - [ ] View all registered users (Students & Teachers)
+  - [ ] Teacher verification check
+  - [ ] Admin-side payment system setup
+  - [ ] View reports
+
+- [ ] **Final Polish and Integration of All Modules**
+
+- [ ] **Analytics → Payment**
+
+- [ ] **Final Testing and Debugging**
+
+- [ ] **Deployment (If Applicable)**
+
 ```bash
 npm run dev
 # or

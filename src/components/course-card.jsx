@@ -6,6 +6,8 @@ import { CourseProgress } from "./course-progress";
 import Image from "next/image";
 
 export const CourseCard = ({ id, title, imageUrl, chaptersLength, price, progress, category }) => {
+  console.log("Progress : ", progress);
+
   return (
     <Link href={`/courses/${id}`}>
       <div className="group hover:shadow-sm transition overflow-hidden border rounded-lg p-3 h-full">
@@ -27,7 +29,7 @@ export const CourseCard = ({ id, title, imageUrl, chaptersLength, price, progres
             </div>
           </div>
           {progress !== null ? (
-            <CourseProgress variant={progress === 100 ? "success" : "default"} />
+            <CourseProgress variant={progress === 100 ? "success" : "default"} value={progress} />
           ) : (
             <p className="text-md md:text-sm font-medium text-slate-700">{formatPrice(price)}</p>
           )}
