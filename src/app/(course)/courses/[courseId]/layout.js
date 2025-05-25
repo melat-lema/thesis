@@ -6,10 +6,16 @@ import { getProgress } from "actions/get-progress";
 import { CourseNavbar } from "./_components/course-navbar";
 
 const Layout = async ({ children, params }) => {
-  const { userId } = await auth();
+  const { userId: clerkUserId } = await auth();
   const courseId = (await params).courseId;
 
-  if (!userId) {
+  if (!clerkUserId) {
+    return redirect("/");
+  }
+
+  // Find the local user by Clerk userId
+  const user = await db.user.findUnique({ where: { clerkId: clerkUserId } });
+  if (!user) {
     return redirect("/");
   }
 
@@ -25,7 +31,7 @@ const Layout = async ({ children, params }) => {
         include: {
           userProgress: {
             where: {
-              userId,
+              userId: user.id, // Use local DB user ID
             },
           },
         },
@@ -40,8 +46,8 @@ const Layout = async ({ children, params }) => {
     return redirect("/");
   }
 
-  const progressCount = await getProgress(userId, course.id);
-  console.log("Progress Count : ", userId, course.id);
+  const progressCount = await getProgress(user.id, course.id);
+  console.log("Progress Count : ", user.id, course.id);
   console.log("Get Progress : ", progressCount);
 
   return (

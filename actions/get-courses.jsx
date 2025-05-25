@@ -1,15 +1,19 @@
 import { db } from "@/lib/db";
 import { getProgress } from "./get-progress";
 
-export const getCourses = async ({ userId, title, categoryId }) => {
+export const getCourses = async ({ userId: clerkUserId, title, categoryId }) => {
   try {
+    // Find the local user by Clerk userId
+    let dbUserId = undefined;
+    if (clerkUserId) {
+      const user = await db.user.findUnique({ where: { clerkId: clerkUserId } });
+      dbUserId = user?.id;
+    }
     const courses = await db.course.findMany({
       where: {
         isPublished: true,
-        title: {
-          contains: title,
-        },
-        categoryId,
+        ...(title && { title: { contains: title } }),
+        ...(categoryId && { categoryId }),
       },
       include: {
         category: true,
@@ -21,11 +25,13 @@ export const getCourses = async ({ userId, title, categoryId }) => {
             id: true,
           },
         },
-        purchases: {
-          where: {
-            userId,
-          },
-        },
+        purchases: dbUserId
+          ? {
+              where: {
+                userId: dbUserId,
+              },
+            }
+          : false,
       },
       orderBy: {
         createdAt: "desc",
@@ -33,13 +39,13 @@ export const getCourses = async ({ userId, title, categoryId }) => {
     });
     const coursesWithProgress = await Promise.all(
       courses.map(async (course) => {
-        if (course.purchases.length === 0) {
+        if (!dbUserId || course.purchases.length === 0) {
           return {
             ...course,
             progress: null,
           };
         }
-        const progressPercentage = await getProgress(userId, course.id);
+        const progressPercentage = await getProgress(dbUserId, course.id);
 
         return {
           ...course,

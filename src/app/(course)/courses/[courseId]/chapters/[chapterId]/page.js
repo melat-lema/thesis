@@ -9,21 +9,29 @@ import { File } from "lucide-react";
 import { getChapter } from "actions/get-chapter";
 import { Banners } from "@/components/Banners";
 import { CommentList } from "../../_components/comment-list";
+import { db } from "@/lib/db";
 
 const ChapterIdPage = async ({ params }) => {
-  const { userId } = await auth();
+  const { userId: clerkUserId } = await auth();
   const { courseId, chapterId } = await params;
 
-  if (!userId) {
+  if (!clerkUserId) {
     console.log("No user ID found");
     return redirect("/");
   }
 
-  console.log(userId);
+  // Find the local user by Clerk userId
+  const user = await db.user.findUnique({ where: { clerkId: clerkUserId } });
+  if (!user) {
+    console.log("No local user found");
+    return redirect("/");
+  }
+
+  console.log(clerkUserId);
 
   const { chapter, course, muxData, attachments, nextChapter, userProgress, purchase } =
     await getChapter({
-      userId,
+      userId: user.id, // Use local DB user ID
       chapterId,
       courseId,
     });
@@ -53,7 +61,7 @@ const ChapterIdPage = async ({ params }) => {
             title={chapter.title}
             courseId={courseId}
             nextChapterId={nextChapter?.id}
-            playBackId={muxData?.playBackId}
+            playbackId={muxData?.playbackId}
             isLocked={isLocked}
             completeOnEnd={completeOnEnd}
           />
@@ -81,7 +89,7 @@ const ChapterIdPage = async ({ params }) => {
             <>
               <Separator />
               <div className="p-4">
-                {attachments.map((attachment) => {
+                {attachments.map((attachment) => (
                   <a
                     href={attachment.url}
                     target="_blank"
@@ -90,8 +98,8 @@ const ChapterIdPage = async ({ params }) => {
                   >
                     <File />
                     <p className="line-clamp-1">{attachment.name}</p>
-                  </a>;
-                })}
+                  </a>
+                ))}
                 {/* <Preview value={chapter.description} /> */}
                 <p className="text-xs text-muted-foreground ml-3">{chapter.description}</p>
               </div>

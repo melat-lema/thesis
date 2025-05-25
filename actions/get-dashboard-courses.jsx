@@ -1,11 +1,18 @@
 import { db } from "@/lib/db";
 import { getProgress } from "./get-progress";
 
-export const getDashboardCourses = async (userId) => {
+export const getDashboardCourses = async (clerkUserId) => {
   try {
+    // Find the local user by Clerk userId
+    const user = await db.user.findUnique({
+      where: { clerkId: clerkUserId },
+    });
+    if (!user) {
+      return { completedCourses: [], coursesInProgress: [] };
+    }
     const purchasedCourses = await db.purchase.findMany({
       where: {
-        userId,
+        userId: user.id, // Use local DB user ID
       },
       select: {
         course: {
@@ -25,7 +32,7 @@ export const getDashboardCourses = async (userId) => {
 
     // Create an array of promises to fetch progress for each course concurrently
     const progressPromises = courses.map(async (course) => {
-      const progress = await getProgress(userId, course.id);
+      const progress = await getProgress(user.id, course.id);
       return { ...course, progress }; // Create a new object with updated progress
     });
 
