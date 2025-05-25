@@ -82,8 +82,7 @@ const ChapterIdPage = async ({ params }) => {
           </div>
           <Separator />
           <div>
-            {/* <Preview value={chapter.description} /> */}
-            <p className="text-md text-muted-foreground ml-3">{chapter.description}</p>
+            <Preview value={chapter.description} />
           </div>
           {!!attachments.length && (
             <>
@@ -100,8 +99,6 @@ const ChapterIdPage = async ({ params }) => {
                     <p className="line-clamp-1">{attachment.name}</p>
                   </a>
                 ))}
-                {/* <Preview value={chapter.description} /> */}
-                <p className="text-xs text-muted-foreground ml-3">{chapter.description}</p>
               </div>
             </>
           )}
