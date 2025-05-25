@@ -14,6 +14,7 @@ export const CommentForm = ({ courseId, onCommentAdded }) => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
+      console.log("Submitting comment:", content);
       const response = await axios.post(`/api/courses/${courseId}/comments`, {
         content,
       });
@@ -24,6 +25,7 @@ export const CommentForm = ({ courseId, onCommentAdded }) => {
         onCommentAdded(response.data);
       }
     } catch (error) {
+      console.error("Error submitting comment:", error);
       toast.error("Something went wrong");
     } finally {
       setIsSubmitting(false);

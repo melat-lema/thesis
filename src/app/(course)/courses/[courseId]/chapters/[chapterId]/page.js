@@ -103,7 +103,7 @@ const ChapterIdPage = async ({ params }) => {
             </>
           )}
           <div className="mt-6 px-4">
-            <CommentList courseId={course.id} />
+            <CommentList courseId={courseId} />
           </div>
         </div>
       </div>

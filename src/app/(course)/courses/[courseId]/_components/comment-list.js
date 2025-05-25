@@ -9,11 +9,14 @@ export const CommentList = ({ courseId }) => {
   const [comments, setComments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  console.log("courseId", courseId);
+  console.log("comments", comments);
   useEffect(() => {
     const fetchComments = async () => {
       try {
         const response = await axios.get(`/api/courses/${courseId}/comments`);
         setComments(response.data);
+        console.log("response.data", response.data);
       } catch (error) {
         console.error("Failed to fetch comments:", error);
         toast.error("Failed to fetch comments");

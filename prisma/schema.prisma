@@ -34,6 +34,7 @@ model User {
   courses       Course[]  @relation("CourseTeacher")
   enrolledCourses Course[] @relation("EnrolledStudents")
   chapaTransactions ChapaTransaction[]
+   comments         Comment[]  
 
   @@index([clerkId])
 }
@@ -225,6 +226,7 @@ model Comment {
   id        String   @id @default(uuid())
   content   String   @db.Text
   userId    String
+  user      User     @relation(fields: [userId], references: [id]) 
   courseId  String
   course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
@@ -233,3 +235,4 @@ model Comment {
   @@index([courseId])
   @@index([userId])
 }
+

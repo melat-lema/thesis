@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
 import { useConfettiStore } from "hooks/use-confetti-store";
+import { Badge } from "@/components/ui/badge";
 
 export const CourseProgressButton = ({ chapterId, courseId, isCompleted, nextChapterId }) => {
   const router = useRouter();
@@ -39,18 +40,20 @@ export const CourseProgressButton = ({ chapterId, courseId, isCompleted, nextCha
     }
   };
 
-  const Icon = isCompleted ? XCircle : CheckCircle;
-
-  return (
+  return isCompleted ? (
+    <Badge variant="success" className="w-full md:w-auto flex items-center gap-2">
+      <CheckCircle className="h-4 w-4" /> Completed
+    </Badge>
+  ) : (
     <Button
       onClick={onClick}
       disabled={isLoading}
       type="button"
-      variant={isCompleted ? "outline" : "success"}
+      variant="success"
       className="w-full md:w-auto"
     >
-      {isCompleted ? "Not completed" : "Mark as complete"}
-      <Icon className="h-4 w-4 ml-2" />
+      Mark as complete
+      <CheckCircle className="h-4 w-4 ml-2" />
     </Button>
   );
 };
