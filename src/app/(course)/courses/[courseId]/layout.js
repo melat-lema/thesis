@@ -41,6 +41,8 @@ const Layout = async ({ children, params }) => {
   }
 
   const progressCount = await getProgress(userId, course.id);
+  console.log("Progress Count : ", userId, course.id);
+  console.log("Get Progress : ", progressCount);
 
   return (
     <div className="h-full">

@@ -8,6 +8,7 @@ import { Preview } from "@/components/preview";
 import { File } from "lucide-react";
 import { getChapter } from "actions/get-chapter";
 import { Banners } from "@/components/Banners";
+import { CommentList } from "../../_components/comment-list";
 
 const ChapterIdPage = async ({ params }) => {
   const { userId } = await auth();
@@ -33,6 +34,10 @@ const ChapterIdPage = async ({ params }) => {
     console.log("Chapter or course not found");
     return redirect("/");
   }
+
+  // DEBUG VIDEO PLAYER
+
+  console.log(chapter.videoUrl, muxData, nextChapter, userProgress, purchase);
 
   const isLocked = !chapter.isFree && !purchase;
   const completeOnEnd = !purchase && !userProgress?.isCompleted;
@@ -70,7 +75,7 @@ const ChapterIdPage = async ({ params }) => {
           <Separator />
           <div>
             {/* <Preview value={chapter.description} /> */}
-            <p className="text-xs text-muted-foreground ml-3">{chapter.description}</p>
+            <p className="text-md text-muted-foreground ml-3">{chapter.description}</p>
           </div>
           {!!attachments.length && (
             <>
@@ -92,6 +97,9 @@ const ChapterIdPage = async ({ params }) => {
               </div>
             </>
           )}
+          <div className="mt-6 px-4">
+            <CommentList courseId={course.id} />
+          </div>
         </div>
       </div>
     </div>
