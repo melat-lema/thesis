@@ -27,7 +27,7 @@ const formSchema = z.object({
 });
 
 const CreatePage = () => {
-    const router=useRouter();
+  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,15 +38,14 @@ const CreatePage = () => {
   const { isSubmitting, isValid } = form.formState;
 
   const onSubmit = async (values) => {
-    try{
-        const response= await axios.post("/api/courses",values);
-        router.push(`/dashboard/teacher/courses/${response.data.id}`);
-        toast.success("Course Created")
-        
+    try {
+      const response = await axios.post("/api/courses", values);
+      router.push(`/dashboard/teacher/courses/${response.data.id}`);
+      toast.success("Course Created");
+    } catch {
+      console.log(error);
+      toast.error("something went wrong");
     }
- catch{
-    toast.error("something went wrong");
- }
   };
 
   return (
@@ -54,14 +53,10 @@ const CreatePage = () => {
       <div>
         <h1 className="text-2xl">Name your course</h1>
         <p className="text-sm text-slate-600">
-          What would you like to name your course? Don't worry, you can change
-          this later.
+          What would you like to name your course? Don't worry, you can change this later.
         </p>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8 mt-8"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mt-8">
             <FormField
               control={form.control}
               name="title"
@@ -75,9 +70,7 @@ const CreatePage = () => {
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>
-                    What will you teach in this course?
-                  </FormDescription>
+                  <FormDescription>What will you teach in this course?</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

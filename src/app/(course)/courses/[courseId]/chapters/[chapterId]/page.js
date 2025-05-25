@@ -36,16 +36,14 @@ const ChapterIdPage = async ({ params }) => {
       courseId,
     });
 
-  console.log(chapter, course);
-
   if (!chapter || !course) {
     console.log("Chapter or course not found");
     return redirect("/");
   }
 
-  // DEBUG VIDEO PLAYER
-
-  console.log(chapter.videoUrl, muxData, nextChapter, userProgress, purchase);
+  // console.log("Chapter Data", chapter.videoUrl, muxData, nextChapter, userProgress, purchase);
+  console.log("muxData", muxData);
+  console.log("nextChapter", chapter);
 
   const isLocked = !chapter.isFree && !purchase;
   const completeOnEnd = !purchase && !userProgress?.isCompleted;
@@ -56,15 +54,7 @@ const ChapterIdPage = async ({ params }) => {
       )}
       <div className="flex flex-col max-w-4xl mx-auto pb-20">
         <div className="p-4">
-          <VideoPlayer
-            chapterId={chapterId}
-            title={chapter.title}
-            courseId={courseId}
-            nextChapterId={nextChapter?.id}
-            playbackId={muxData?.playbackId}
-            isLocked={isLocked}
-            completeOnEnd={completeOnEnd}
-          />
+          <VideoPlayer videoUrl={chapter.videoUrl} isLocked={isLocked} title={chapter.title} />
         </div>
         <div>
           <div className="p-4 flex flex-col md:flex-row items-center justify-between">
