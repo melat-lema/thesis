@@ -12,7 +12,7 @@ First, run the development server:
 
   - [x] Course portal
   - [x] Payment integration
-  - [ ] Comment and report section
+  - [x] Comment and report section
 
 - [x] **Progress Tracking (Student Side)**
 

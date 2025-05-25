@@ -1,107 +1,97 @@
-// import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-// import Stripe from "stripe";
-
+import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
-import { stripe } from "@/lib/strip";
-import { currentUser } from "@clerk/nextjs/server";
-// import { currentUser } from "@/lib/auth";
+import { initializePayment } from "@/lib/chapa";
+import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req, { params }) {
   try {
-    const user = await currentUser();
+    const { userId } = await auth();
     const { courseId } = await params;
 
-    //     console.log("user :", user);
-    console.log("user.id :", user.id);
-    console.log("user.emailAddresses[0].emailAddress :", user.emailAddresses[0].emailAddress);
-
-    console.log("courseId :", courseId);
-    //     console.log("params :", params);
-
-    if (!user || !user.id || !user.emailAddresses?.[0]?.emailAddress) {
+    if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const course = await db.course.findUnique({
+    const user = await db.user.findUnique({
       where: {
-        id: courseId,
-        isPublished: true,
+        clerkId: userId,
       },
     });
-    console.log("course found :", course);
-    const purchase = await db.purchase.findUnique({
+
+    const course = await db.course.findUnique({ where: { id: courseId } });
+    console.log("user", user);
+
+    if (!user) {
+      console.log("user not found");
+      return new NextResponse("User not found", { status: 404 });
+    }
+
+    console.log("course", course);
+
+    if (!course) {
+      console.log("course not found");
+      return new NextResponse("Course not found", { status: 404 });
+    }
+
+    console.log("Clerk userId:", userId);
+    console.log("DB user.id:", user.id);
+    console.log("Checking for purchase:", { userId: user.id, courseId });
+
+    const existingPurchase = await db.purchase.findUnique({
       where: {
         userId_courseId: {
           userId: user.id,
-          courseId: courseId,
+          courseId,
         },
       },
     });
 
-    if (purchase) {
-      return new NextResponse("Already purchased", { status: 400 });
-    }
+    console.log("existingPurchase", existingPurchase);
 
-    if (!course) {
-      return new NextResponse("Not found", { status: 404 });
-    }
-
-    const lineItems = [
-      {
-        quantity: 1,
-        price_data: {
-          currency: "USD",
-          product_data: {
-            name: course.title,
-            description: course.description,
-          },
-          unit_amount: Math.round(course.price * 100),
-        },
-      },
-    ];
-
-    let stripeCustomer = await db.stripeCustomer.findFirst({
-      where: {
-        userId: user.id,
-      },
-      select: {
-        stripeCustomer: true,
-      },
-    });
-
-    if (!stripeCustomer) {
-      const customer = await stripe.customers.create({
-        email: user.emailAddresses[0].emailAddress,
-      });
-
-      stripeCustomer = await db.stripeCustomer.create({
-        data: {
-          userId: user.id,
-          stripeCustomer: customer.id,
-        },
+    if (existingPurchase) {
+      return new NextResponse("You already purchased this course", {
+        status: 400,
       });
     }
 
-    const session = await stripe.checkout.sessions.create({
-      customer: stripeCustomer.stripeCustomer,
-      line_items: lineItems,
-      mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/courses/${
-        course.id
-      }?success=1`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/courses/${
-        course.id
-      }?canceled=1`,
-      metadata: {
-        courseId: course.id,
+    const tx_ref = uuidv4();
+
+    // Create ChapaTransaction record
+    await db.chapaTransaction.create({
+      data: {
         userId: user.id,
+        courseId,
+        tx_ref,
+        amount: Number(course.price),
+        status: "pending",
       },
     });
 
-    return NextResponse.json({ url: session.url });
+    const fullName = user.name?.trim() || "User Name";
+    const [first_name, ...rest] = fullName.split(" ");
+    const last_name = rest.join(" ") || "Name";
+
+    const paymentPayload = {
+      amount: Number(course.price).toFixed(2), // "100.00"
+      currency: "ETB",
+      email: user.email || "example@example.com", // fallback
+      first_name,
+      last_name,
+      tx_ref,
+      callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/chapa/webhook`,
+      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/courses/${courseId}?payment=success`,
+      customization: {
+        title: course.title.slice(0, 16), // Ensure max 16 chars
+        description: `Enroll to ${course.title}`,
+      },
+    };
+
+    const chapaResponse = await initializePayment(paymentPayload);
+
+    return NextResponse.json({ url: chapaResponse.data.checkout_url });
   } catch (error) {
-    console.log("[COURSE_ID_CHECKOUT]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.error("[COURSE_CHECKOUT] Error:", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
