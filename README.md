@@ -18,10 +18,10 @@ First, run the development server:
 
 - [x] **Chat Feature (Student Side)**
 
-- [ ] **Teacher Dashboard Base**
+- [x] **Teacher Dashboard Base**
 
   - [ ] Chat feature (Teacher side)
-  - [ ] Teacher statistics & progress tracking
+  - [x] Teacher statistics & progress tracking
   - [ ] AI feature → Student dashboard
 
 - [ ] **Admin Dashboard Setup**
