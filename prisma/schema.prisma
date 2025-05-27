@@ -41,7 +41,7 @@ model User {
 
 model StudyMaterial {
   id           Int      @id @default(autoincrement())
-  cId          String   
+  cId          String   @unique
   studyType    String   @db.VarChar(255)
   topic        String   @db.Text
   difficultyLevel String @default("Easy")
@@ -50,6 +50,20 @@ model StudyMaterial {
   createdBy    String   @db.VarChar(255)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt()
+
+  chapters     ChapterNote[]
+}
+
+model ChapterNote {
+  id        String   @id @default(uuid())
+  courseId  String   // Changed from Int to String to match StudyMaterial.cId
+  chapterId Int
+  notes     String
+  createdAt DateTime @default(now())
+
+  studyMaterial StudyMaterial @relation(fields: [courseId], references: [cId], onDelete: Cascade)
+
+  @@index([courseId])
 }
 
 model Course {

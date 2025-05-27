@@ -6,6 +6,7 @@ import { ToastProvider } from "@/components/providers/toaster-provider";
 import { ConfettiProvider } from "@/components/providers/confetti-provider";
 // import font poppins and use it as the main font
 import { Poppins } from "next/font/google";
+import Provider from "./provider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -18,9 +19,11 @@ export default function RootLayout({ children }) {
     <ClerkProvider>
       <html lang="en">
         <body className={`${poppins.variable} font-poppins`}>
-          <ToastProvider />
-          {children}
-          <ConfettiProvider />
+          <Provider>
+            <ToastProvider />
+            {children}
+            <ConfettiProvider />
+          </Provider>
         </body>
       </html>
     </ClerkProvider>

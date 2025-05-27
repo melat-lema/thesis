@@ -1,4 +1,6 @@
+import { db } from "@/lib/db";
 import { inngest } from "./client";
+import { GenerateNotesModel } from "@/lib/AiModel";
 
 export const helloWorld = inngest.createFunction(
   { id: "hello-world" },
@@ -6,36 +8,85 @@ export const helloWorld = inngest.createFunction(
   async ({ event, step }) => {
     await step.sleep("wait-a-moment", "1s");
     return { message: `Hello ${event.data.email}!` };
-  },
+  }
 );
+
 export const CreateNewUser = inngest.createFunction(
-  { id: 'create-user' },
-  { event: 'user.create' },
+  { id: "create-user" },
+  { event: "user.create" },
   async ({ event, step }) => {
-    // Extract userId from the event data (Clerk's userId or other unique identifier)
-    const userId = event.data.userId;
+    const { user } = event.data;
 
-    // Check if the user exists in the database
-    const existingUser = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    // If user doesn't exist, create a new one
-    if (!existingUser) {
-      const newUser = await prisma.user.create({
-        data: {
-          id: userId,
-          name: event.data.name,  // Assuming the name is passed in event data
-          email: event.data.email, // Assuming the email is passed in event data
-          isMember: true, // You can set any other default fields here
+    await step.run("Check User and Create New if Not in DB", async () => {
+      const existingUser = await db.user.findUnique({
+        where: {
+          email: user?.primaryEmailAddress?.emailAddress,
         },
       });
-      
-      // Optionally, log the creation or return a message
-      console.log(`Created new user: ${newUser.id}`);
-      return { message: `User ${newUser.name} created successfully!` };
-    }
 
-    // If the user already exists, return a message or handle accordingly
-    return { message: `User ${existingUser.name} already exists.` };
-  })
+      if (!existingUser) {
+        const newUser = await db.user.create({
+          data: {
+            name: user?.fullName,
+            email: user?.primaryEmailAddress?.emailAddress,
+          },
+        });
+        console.log("Created user:", newUser);
+        return newUser;
+      }
+
+      console.log("User already exists:", existingUser);
+      return existingUser;
+    });
+
+    return "Success";
+  }
+);
+
+export const GenerateNotes = inngest.createFunction(
+  { id: "generate-course" },
+  { event: "notes.generate" },
+  async ({ event, step }) => {
+    const { course } = event.data;
+
+    await step.run("Generate Chapter Notes", async () => {
+      const chapters = course?.courseLayout?.chapters ?? [];
+
+      for (let i = 0; i < chapters.length; i++) {
+        const chapter = chapters[i];
+        console.log("chapter : ", chapter);
+
+        const PROMPT = `Generate beautiful exam material detailed content for the chapter, make sure to include all topic points in the content and make sure to give the output in beautiful HTML format that is visually appealing to see. (Do not Add HTML, Head, Body, title tag). Put the response HTML string in a dictionary with a field called "html_content". The chapter is: ${JSON.stringify(
+          chapter
+        )}`;
+
+        const result = await GenerateNotesModel.sendMessage(PROMPT);
+        const jsonAiResponse = JSON.parse(result.response.text());
+        const html_content = jsonAiResponse.html_content;
+
+        await db.chapterNote.create({
+          data: {
+            chapterId: i,
+            courseId: String(course?.cId),
+            notes: html_content,
+          },
+        });
+      }
+
+      return "Completed";
+    });
+
+    await step.run("Update Course Status to Ready", async () => {
+      await db.studyMaterial.update({
+        where: {
+          id: course?.id,
+        },
+        data: {
+          status: "Ready",
+        },
+      });
+
+      return "Success";
+    });
+  }
+);
