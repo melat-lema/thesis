@@ -2,6 +2,9 @@ import React from "react";
 
 function ChapterList({ course }) {
   const Chapters = course?.courseLayout?.chapters;
+
+  console.log(course, " : course");
+
   return (
     <div className="mt-5">
       <h2 className="font-medium text-2xl mt-3">Chapter List</h2>
@@ -10,7 +13,7 @@ function ChapterList({ course }) {
         {Chapters?.map((item, index) => (
           <div
             key={index}
-            className="flex gap-5 items-center p-4 border shadow-md mb-2 rounded-lg cursor-pointer"
+            className="flex gap-5  p-4 border shadow-md mb-2 rounded-lg cursor-pointer flex-col items-start"
           >
             <h2 className="text-2xl"> {item?.black_emoji}</h2>
             <div key={index}>
