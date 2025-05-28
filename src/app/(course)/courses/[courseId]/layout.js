@@ -16,6 +16,7 @@ const Layout = async ({ children, params }) => {
   // Find the local user by Clerk userId
   const user = await db.user.findUnique({ where: { clerkId: clerkUserId } });
   if (!user) {
+    console.log("User not found");
     return redirect("/");
   }
 
@@ -43,6 +44,7 @@ const Layout = async ({ children, params }) => {
   });
 
   if (!course) {
+    console.log("Course not found");
     return redirect("/");
   }
 

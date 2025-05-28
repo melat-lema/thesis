@@ -1,16 +1,10 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-export const SidebarItem = ({ icon: Icon, label, href }) => {
-  const pathname = usePathname();
+export const SidebarItem = ({ icon: Icon, label, href, isActive }) => {
   const router = useRouter();
-
-  const isActive =
-    (pathname === "/dashboard" && href === "/dashboard") ||
-    pathname === href ||
-    pathname?.startsWith(`${href}/`);
 
   const onClick = () => {
     router.push(href);

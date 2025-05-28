@@ -4,35 +4,51 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useUser } from "@clerk/nextjs";
 
 export default function AfterSignUpPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useUser();
   const role = searchParams.get("role") || "student";
 
   useEffect(() => {
-    const assignRole = async () => {
+    const registerUser = async () => {
       try {
+        if (!user) {
+          throw new Error("User not found");
+        }
+
         // Validate role
         if (!["student", "teacher"].includes(role.toLowerCase())) {
           throw new Error("Invalid role specified");
         }
 
+        // First update the role in Clerk
         await axios.post("/api/auth/update-role", { role: role.toLowerCase() });
+
+        // Then create/update user in database
+        await axios.post("/api/auth/register", {
+          clerkId: user.id,
+          email: user.primaryEmailAddress?.emailAddress,
+          name: user.fullName,
+          role: role.toUpperCase(),
+        });
 
         // Redirect based on role
         const redirectPath =
           role.toLowerCase() === "teacher" ? "/dashboard" : "/students-dashboard";
         router.push(redirectPath);
       } catch (error) {
-        console.error("Error assigning role:", error);
-        // Redirect to error page or show error message
-        //         router.push("/error?message=Failed to set up your account. Please try again.");
+        console.error("Error registering user:", error);
         toast.error("Failed to set up your account. Please try again.");
       }
     };
-    assignRole();
-  }, [role, router]);
+
+    if (user) {
+      registerUser();
+    }
+  }, [user, role, router]);
 
   return (
     <div className="flex justify-center items-center min-h-screen w-full">

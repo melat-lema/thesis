@@ -22,18 +22,16 @@ First, run the development server:
 
   - [ ] Chat feature (Teacher side)
   - [x] Teacher statistics & progress tracking
-  - [ ] AI feature → Student dashboard
+  - [x] AI feature → Student dashboard
 
-- [ ] **Admin Dashboard Setup**
+- [x] **Admin Dashboard Setup**
 
-  - [ ] View all registered users (Students & Teachers)
-  - [ ] Teacher verification check
-  - [ ] Admin-side payment system setup
-  - [ ] View reports
+  - [x] View all registered users (Students & Teachers)
+  - [x] Teacher verification check
+  - [x] Admin-side payment system setup
+  - [x] View reports
 
 - [ ] **Final Polish and Integration of All Modules**
-
-- [ ] **Analytics → Payment**
 
 - [ ] **Final Testing and Debugging**
 

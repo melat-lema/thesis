@@ -49,7 +49,7 @@ const ChapterIdPage = async ({ params }) => {
   const completeOnEnd = !purchase && !userProgress?.isCompleted;
   return (
     <div>
-      {userProgress?.isCompleted && (
+      {isLocked && (
         <Banners variant="warning" label="you need to purchase this course to watch this chapter" />
       )}
       <div className="flex flex-col max-w-4xl mx-auto pb-20">

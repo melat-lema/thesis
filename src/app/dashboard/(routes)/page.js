@@ -122,6 +122,14 @@ export default async function Dashboard({ searchParams }) {
 
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
+      <div className="mb-4">
+        {/* <Link
+          href="/dashboard/(routes)/admin-dashboard"
+          className="text-blue-600 underline font-semibold"
+        >
+          Go to Admin Dashboard
+        </Link> */}
+      </div>
       {!unpublishedCourses.length > 0 && (
         <div className="md:col-span-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-xl shadow p-4 flex items-center gap-3 mt-2">
           <span className="text-yellow-700 font-semibold">Attention:</span>

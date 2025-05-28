@@ -7,12 +7,14 @@ import TopicInput from "./_components/TopicInput";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import { Loader } from "lucide-react";
-// import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 export default function Create() {
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState([]);
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleUserInput = (fieldName, fieldValue) => {
     setFormData((prev) => ({
@@ -25,7 +27,7 @@ export default function Create() {
   const GenerateCourseOutline = async () => {
     console.log("formData : ", formData);
     const courseId = uuidv4();
-    // const router = useRouter();
+
     setLoading(true);
     const result = await axios.post("/api/generate-course-outline", {
       courseId: courseId,
@@ -35,9 +37,9 @@ export default function Create() {
       createdBy: user?.primaryEmailAddress.emailAddress,
     });
     setLoading(false);
-    // router.replace("/students-dashboard");
+    router.replace("/students-dashboard");
 
-    toast(
+    toast.success(
       "Your course is generating, please press the refresh button to see if the course has generated or not."
     );
     console.log(result.data.result.resp);
