@@ -4,11 +4,19 @@ import { useEffect } from "react";
 import { Navbar } from "../dashboard/_components/navbar";
 import Image from "next/image";
 import { SidebarRoutes } from "../dashboard/_components/sidebar-routes";
-// import { Logo } from "./logo";
+import toast from "react-hot-toast";
+import { useUser } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 
 // import { Sidebar } from "../dashboard/_components/sidebar";
 // import { Navbar } from "./_components/navbar";
 const AdminDashboardLayout = ({ children }) => {
+  const { user } = useUser();
+  const role = user?.publicMetadata?.role;
+  if (role !== "admin") {
+    toast.error("You are not authorized to access this page");
+    redirect("/");
+  }
   useEffect(() => {
     fetch("/api/auth/status").then((res) => res.json());
   }, []);

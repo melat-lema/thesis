@@ -18,7 +18,7 @@ export default function Header() {
       setUrl("/admin");
     } else if (role === "student") {
       setUrl("/student-dashboard");
-    } else if (role === "instructor") {
+    } else if (role === "teacher") {
       setUrl("/dashboard");
     }
   }, [role]);

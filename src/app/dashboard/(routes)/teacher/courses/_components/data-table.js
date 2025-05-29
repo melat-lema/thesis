@@ -9,7 +9,14 @@ import {
   getPaginationRowModel,
   getFilteredRowModel,
 } from "@tanstack/react-table";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -18,6 +25,9 @@ import { PlusCircle } from "lucide-react";
 export function DataTable({ columns, data }) {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
+
+  console.log("data :", data);
+  console.log("columns :", columns);
 
   const table = useReactTable({
     data,
@@ -38,7 +48,7 @@ export function DataTable({ columns, data }) {
   const columnsAvailable = table.getHeaderGroups().length > 0;
 
   if (!columnsAvailable) {
-    return null;  // Prevent rendering if columns are not available
+    return null; // Prevent rendering if columns are not available
   }
 
   // Get the 'title' column filter value if exists
@@ -52,9 +62,7 @@ export function DataTable({ columns, data }) {
         <Input
           placeholder="Filter courses..."
           value={filterValue ?? ""}
-          onChange={(event) =>
-            columnTitle?.setFilterValue(event.target.value)
-          }
+          onChange={(event) => columnTitle?.setFilterValue(event.target.value)}
           className="max-w-sm"
         />
         {/* New course button */}
@@ -75,10 +83,7 @@ export function DataTable({ columns, data }) {
                   <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                      : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>

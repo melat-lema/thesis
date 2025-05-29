@@ -78,14 +78,31 @@ export async function GET() {
       take: 10,
     });
 
-    // Get payment analytics
+    // Get payment analytics with enhanced teacher and course information
     const payments = await db.chapaTransaction.findMany({
       where: {
         status: "completed",
       },
       include: {
-        course: true,
-        user: true,
+        course: {
+          select: {
+            id: true,
+            title: true,
+            price: true,
+            teacher: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
@@ -93,7 +110,57 @@ export async function GET() {
     const platformRevenue = totalRevenue * 0.2; // 20% platform fee
     const teacherPayouts = totalRevenue * 0.8; // 80% teacher payout
 
-    // Get revenue per course
+    // Get detailed teacher earnings with course breakdown
+    const teacherEarnings = await db.user.findMany({
+      where: {
+        role: "TEACHER",
+      },
+      select: {
+        id: true,
+        name: true,
+        courses: {
+          select: {
+            id: true,
+            title: true,
+            price: true,
+            chapaTransactions: {
+              where: {
+                status: "completed",
+              },
+              select: {
+                amount: true,
+                createdAt: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Transform teacher earnings data
+    const detailedTeacherEarnings = teacherEarnings.map((teacher) => {
+      const teacherTotalEarnings = teacher.courses.reduce((total, course) => {
+        const courseEarnings = course.chapaTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+        return total + courseEarnings;
+      }, 0);
+
+      return {
+        userId: teacher.id,
+        name: teacher.name,
+        earnings: teacherTotalEarnings,
+        platformFee: teacherTotalEarnings * 0.2,
+        teacherPayout: teacherTotalEarnings * 0.8,
+        courses: teacher.courses.map((course) => ({
+          id: course.id,
+          title: course.title,
+          earnings: course.chapaTransactions.reduce((sum, tx) => sum + tx.amount, 0),
+          platformFee: course.chapaTransactions.reduce((sum, tx) => sum + tx.amount, 0) * 0.2,
+          teacherPayout: course.chapaTransactions.reduce((sum, tx) => sum + tx.amount, 0) * 0.8,
+        })),
+      };
+    });
+
+    // Get revenue per course with course titles
     const revenuePerCourse = await db.chapaTransaction.groupBy({
       by: ["courseId"],
       _sum: {
@@ -104,15 +171,28 @@ export async function GET() {
       },
     });
 
-    // Get teacher earnings
-    const teacherEarnings = await db.chapaTransaction.groupBy({
-      by: ["userId"],
-      _sum: {
-        amount: true,
-      },
+    // Get course titles for the revenue data
+    const courseIds = revenuePerCourse.map((item) => item.courseId);
+    const courses = await db.course.findMany({
       where: {
-        status: "completed",
+        id: {
+          in: courseIds,
+        },
       },
+      select: {
+        id: true,
+        title: true,
+      },
+    });
+
+    // Combine revenue data with course titles
+    const revenuePerCourseWithTitles = revenuePerCourse.map((item) => {
+      const course = courses.find((c) => c.id === item.courseId);
+      return {
+        courseId: item.courseId,
+        courseTitle: course?.title || "Unknown Course",
+        revenue: item._sum.amount,
+      };
     });
 
     return NextResponse.json({
@@ -148,20 +228,16 @@ export async function GET() {
         platformRevenue,
         teacherPayouts,
         totalRefunds: 0, // Implement refund tracking if needed
-        revenuePerCourse: revenuePerCourse.map((item) => ({
-          courseId: item.courseId,
-          revenue: item._sum.amount,
-        })),
-        teacherEarnings: teacherEarnings.map((item) => ({
-          userId: item.userId,
-          earnings: item._sum.amount,
-        })),
+        revenuePerCourse: revenuePerCourseWithTitles,
+        teacherEarnings: detailedTeacherEarnings,
         paymentHistory: payments.map((payment) => ({
           id: payment.id,
           amount: payment.amount,
           status: payment.status,
           courseTitle: payment.course.title,
+          courseId: payment.course.id,
           userName: payment.user.name,
+          userId: payment.user.id,
           createdAt: payment.createdAt,
         })),
         refunds: [], // Implement refund tracking if needed

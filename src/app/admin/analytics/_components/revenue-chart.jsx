@@ -37,7 +37,7 @@ export function RevenueChart({ data }) {
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
-            dataKey="courseId"
+            dataKey="courseTitle"
             tick={{ fontSize: 12 }}
             angle={-45}
             textAnchor="end"

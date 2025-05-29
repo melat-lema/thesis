@@ -18,6 +18,7 @@ export default function EarningsBarChart({ data, title }) {
       </div>
     );
   }
+  console.log("data :", data);
 
   // Sort data by earnings in descending order
   const sortedData = [...data].sort((a, b) => b.earnings - a.earnings);
@@ -29,7 +30,7 @@ export default function EarningsBarChart({ data, title }) {
         <BarChart data={sortedData} margin={{ top: 10, right: 20, left: 0, bottom: 30 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis
-            dataKey={title === "Earnings per Teacher" ? "name" : "title"}
+            dataKey="title"
             angle={-15}
             textAnchor="end"
             interval={0}
@@ -42,7 +43,7 @@ export default function EarningsBarChart({ data, title }) {
           />
           <Tooltip
             formatter={(value) => [`ETB ${Number(value).toLocaleString()}`, "Earnings"]}
-            labelFormatter={(label) => `Teacher: ${label}`}
+            labelFormatter={(label) => `Course: ${label}`}
             contentStyle={{
               backgroundColor: "white",
               border: "1px solid #e5e7eb",

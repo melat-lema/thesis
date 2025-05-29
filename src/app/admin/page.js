@@ -41,8 +41,6 @@ export default function AdminDashboard() {
   //   redirect("/");
   // }
 
-  console.log(role);
-
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
