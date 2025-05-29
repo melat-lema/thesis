@@ -4,9 +4,24 @@ import Link from "next/link";
 import { FaChevronDown } from "react-icons/fa";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { Button } from "./ui/button";
+import { useEffect, useState } from "react";
 
 export default function Header() {
-  const { isSignedIn } = useUser();
+  const [url, setUrl] = useState("/");
+  const { isSignedIn, user } = useUser();
+  const role = user?.publicMetadata?.role;
+
+  console.log("role : ", role);
+
+  useEffect(() => {
+    if (role === "admin") {
+      setUrl("/admin");
+    } else if (role === "student") {
+      setUrl("/student-dashboard");
+    } else if (role === "instructor") {
+      setUrl("/dashboard");
+    }
+  }, [role]);
 
   return (
     <nav className="bg-white shadow sticky top-0 p-0 z-50">
@@ -58,7 +73,7 @@ export default function Header() {
           {/* Conditional Rendering based on auth status */}
           {isSignedIn ? (
             <div className="flex items-center gap-x-2">
-              <Link href="/dashboard">
+              <Link href={url}>
                 <Button variant="ghost" size="sm">
                   Dashboard
                 </Button>
