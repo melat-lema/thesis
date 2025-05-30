@@ -73,6 +73,11 @@ export default function Header() {
           {/* Conditional Rendering based on auth status */}
           {isSignedIn ? (
             <div className="flex items-center gap-x-2">
+              <Link href="/chat">
+                <Button variant="ghost" size="sm">
+                  Chat
+                </Button>
+              </Link>
               <Link href={url}>
                 <Button variant="ghost" size="sm">
                   Dashboard
