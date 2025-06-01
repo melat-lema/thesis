@@ -57,9 +57,34 @@ export async function POST(req, { params }) {
     return NextResponse.json(newQuiz, { status: 201 });
   } catch (error) {
     console.error("Quiz creation error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to create quiz" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || "Failed to create quiz" }, { status: 500 });
+  }
+}
+
+export async function GET(req, { params }) {
+  const { courseId, chapterId } = params;
+
+  try {
+    const quiz = await db.quiz.findFirst({
+      where: {
+        chapterId: chapterId,
+      },
+      include: {
+        questions: {
+          include: {
+            options: true,
+          },
+        },
+      },
+    });
+
+    if (!quiz) {
+      return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(quiz);
+  } catch (error) {
+    console.error("Error fetching quiz:", error);
+    return NextResponse.json({ error: error.message || "Failed to fetch quiz" }, { status: 500 });
   }
 }

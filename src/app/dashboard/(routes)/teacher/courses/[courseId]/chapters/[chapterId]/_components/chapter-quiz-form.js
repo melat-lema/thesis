@@ -13,7 +13,9 @@ export const ChapterQuizForm = ({ initialData, courseId, chapterId }) => {
   const router = useRouter();
 
   // Ensure quizzes is always initialized as an array
-  const [quizzes, setQuizzes] = useState(Array.isArray(initialData.quizzes) ? initialData.quizzes : []);
+  const [quizzes, setQuizzes] = useState(
+    Array.isArray(initialData.quizzes) ? initialData.quizzes : []
+  );
   const [editingQuizIndex, setEditingQuizIndex] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,17 +62,22 @@ export const ChapterQuizForm = ({ initialData, courseId, chapterId }) => {
       let res;
       if (editingQuizIndex !== null) {
         const quizId = quizzes[editingQuizIndex].id;
-        res = await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}/quiz/${quizId}`, { questions });
+        res = await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}/quiz/${quizId}`, {
+          questions,
+        });
         const updated = [...quizzes];
         updated[editingQuizIndex] = res.data;
         setQuizzes(updated);
       } else {
-        res = await axios.post(`/api/courses/${courseId}/chapters/${chapterId}/quiz`, { questions });
+        res = await axios.post(`/api/courses/${courseId}/chapters/${chapterId}/quiz`, {
+          questions,
+        });
         setQuizzes((prev) => [...prev, res.data]);
       }
 
       toast.success("Quiz saved");
       cancelEdit();
+      router.refresh();
     } catch (error) {
       console.error(error);
       toast.error(`Error: ${error.response?.data?.error || "Something went wrong"}`);
@@ -169,7 +176,9 @@ export const ChapterQuizForm = ({ initialData, courseId, chapterId }) => {
           </Button>
 
           <div className="flex justify-end space-x-2">
-            <Button onClick={cancelEdit} variant="outline">Cancel</Button>
+            <Button onClick={cancelEdit} variant="outline">
+              Cancel
+            </Button>
             <Button onClick={onSubmit} disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save Quiz"}
             </Button>

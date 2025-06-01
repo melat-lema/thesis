@@ -10,6 +10,7 @@ import { getChapter } from "actions/get-chapter";
 import { Banners } from "@/components/Banners";
 import { CommentList } from "../../_components/comment-list";
 import { db } from "@/lib/db";
+import ChapterQuizSection from "@/app/students-dashboard/course/[courseId]/_components/ChapterQuizSection";
 
 const ChapterIdPage = async ({ params }) => {
   const { userId: clerkUserId } = await auth();
@@ -89,6 +90,14 @@ const ChapterIdPage = async ({ params }) => {
                     <p className="line-clamp-1">{attachment.name}</p>
                   </a>
                 ))}
+              </div>
+            </>
+          )}
+          {!isLocked && (
+            <>
+              <Separator />
+              <div className="p-4">
+                <ChapterQuizSection chapterId={chapterId} courseId={courseId} />
               </div>
             </>
           )}
