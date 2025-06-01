@@ -54,6 +54,7 @@ model StudyMaterial {
   updatedAt    DateTime @updatedAt()
 
   chapters     ChapterNote[]
+  flashcards   Flashcard[]
 }
 
 model ChapterNote {
@@ -266,5 +267,48 @@ model Message {
 
   @@index([senderId])
   @@index([receiverId])
+}
+
+model Flashcard {
+  id            String   @id @default(uuid())
+  question      String   @db.Text
+  answer        String   @db.Text
+  topic         String   @db.Text
+  position      Int      @default(0)
+  studyMaterial StudyMaterial @relation(fields: [studyMaterialId], references: [cId], onDelete: Cascade)
+  studyMaterialId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt()
+
+  @@index([studyMaterialId])
+  @@index([topic])
+}
+
+model AIGeneratedQuiz {
+  id        String   @id @default(uuid())
+  question  String
+  options   String[] // Array of options
+  answer    String   // The correct answer
+  topic     String
+  position  Int
+  studyMaterialId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studyMaterialId])
+}
+
+model AIGeneratedQA {
+  id        String   @id @default(uuid())
+  question  String   @db.Text
+  answer    String   @db.Text
+  topic     String   @db.Text
+  position  Int
+  studyMaterialId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studyMaterialId])
+  @@index([topic])
 }
 

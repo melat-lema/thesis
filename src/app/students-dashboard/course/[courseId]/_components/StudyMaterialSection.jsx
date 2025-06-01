@@ -15,44 +15,77 @@ function StudyMaterialSection({ courseId }) {
       name: "Flashcard",
       desc: "Flashcard to remember the concepts",
       icon: "/flashcard.jpg",
-      path: "/notes",
-      disabled: true,
+      path: "/flashcards",
+      disabled: false,
     },
     {
       name: "Quiz",
       desc: "Great way to test your knowledge",
       icon: "/question.png",
-      path: "/notes",
-      disabled: true,
+      path: "/quiz",
+      disabled: false,
     },
     {
       name: "Question/Answer",
       desc: "Help to practice your learning ",
       icon: "/q-and-a.png",
-      path: "/notes",
-      disabled: true,
+      path: "/qa",
+      disabled: false,
     },
   ];
-  const [studyNotes, setNotesContent] = useState();
+  const [studyMaterial, setStudyMaterial] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    GetNotes();
-  }, []);
-  const GetNotes = async () => {
-    const result = await axios.post("/api/study-type", {
-      courseId: courseId,
-    });
-    console.log(result.data);
-    setNotesContent(result.data);
+    fetchStudyMaterial();
+  }, [courseId]);
+
+  const fetchStudyMaterial = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`/api/study-type?courseId=${courseId}`);
+      setStudyMaterial(response.data);
+    } catch (error) {
+      console.error("Error fetching study material:", error);
+      setError("Failed to load study material");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="mt-5">
+        <h2 className="font-medium text-2xl mt-3">Study Material</h2>
+        <div className="flex items-center justify-center h-40">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mt-5">
+        <h2 className="font-medium text-2xl mt-3">Study Material</h2>
+        <div className="text-center text-red-500 mt-4">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-5">
       <h2 className="font-medium text-2xl mt-3">Study Material</h2>
+      {studyMaterial && <p className="text-sm text-gray-500 mt-1">Topic: {studyMaterial.topic}</p>}
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-4 mt-4">
         {MaterialList.map((item, index) => (
-          <Link key={index} href={"/students-dashboard/course/" + courseId + item.path}>
+          <Link
+            key={index}
+            href={item.disabled ? "#" : "/students-dashboard/course/" + courseId + item.path}
+            className={item.disabled ? "cursor-not-allowed" : ""}
+          >
             <MaterialCardItem key={index} item={item} />
           </Link>
         ))}
