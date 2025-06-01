@@ -130,17 +130,17 @@ export default async function Dashboard({ searchParams }) {
           Go to Admin Dashboard
         </Link> */}
       </div>
-      {!unpublishedCourses.length > 0 && (
-        <div className="md:col-span-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-xl shadow p-4 flex items-center gap-3 mt-2">
-          <span className="text-yellow-700 font-semibold">Attention:</span>
-          <span className="text-yellow-700">
-            You have {unpublishedCourses.length} unpublished course(s).{" "}
-            <Link href="/dashboard/teacher/courses" className="underline">
-              Review now
-            </Link>
-          </span>
-        </div>
-      )}
+      {/* {unpublishedCourses.length > 0 && ( */}
+      <div className="md:col-span-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-xl shadow p-4 flex items-center gap-3 mt-2">
+        <span className="text-yellow-700 font-semibold">Attention:</span>
+        <span className="text-yellow-700">
+          You have {unpublishedCourses.length} unpublished course(s).{" "}
+          <Link href="/dashboard/teacher/courses" className="underline">
+            Review now
+          </Link>
+        </span>
+      </div>
+      {/* )} */}
       <div className="flex items-center justify-between mb-5 mt-5">
         <h1 className="text-4xl font-bold">Dashboard</h1>
         <div className="">
@@ -192,7 +192,8 @@ export default async function Dashboard({ searchParams }) {
         />
         <DashboardStatCard
           label="Courses"
-          value={totalCourses}
+          // total course - unpublished course
+          value={totalCourses - unpublishedCourses.length}
           subLabel="+19% from last month"
           icon={<CreditCard className="w-6 h-6" />}
         />

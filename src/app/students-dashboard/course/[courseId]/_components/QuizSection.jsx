@@ -116,14 +116,7 @@ const QuizSection = ({ courseId }) => {
       <div className="text-center">
         <p className="text-red-500 mb-4">{error}</p>
         <div className="space-y-2">
-          <p className="text-sm text-gray-500">
-            If you're seeing an API key error, please make sure:
-          </p>
-          <ul className="text-sm text-gray-500 list-disc list-inside">
-            <li>You have a valid Google AI API key</li>
-            <li>The API key is properly set in your .env file</li>
-            <li>The server has been restarted after adding the API key</li>
-          </ul>
+          <p className="text-sm text-gray-500">Something went wrong</p>
           <button
             onClick={generateQuiz}
             className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
