@@ -4,12 +4,14 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
   try {
     const { userId } = getAuth(req);
-    const { role } = await req.json();
+    const { role, userId: userIdFromParams } = await req.json();
 
     console.log("userId", userId);
+    console.log("userIdFromParams", userIdFromParams);
     console.log("role", role);
 
-    if (!userId) {
+    if (!userIdFromParams) {
+      console.log("userId is not found");
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -17,10 +19,10 @@ export async function POST(req) {
     if (!role || !["student", "teacher"].includes(role.toLowerCase())) {
       return new NextResponse("Invalid role specified", { status: 400 });
     }
-    const roleFormatted = role === "teacher" ? "teacher" : "member";
+    const roleFormatted = role === "teacher" ? "teacher" : "student";
 
     const client = await clerkClient();
-    await client.users.updateUserMetadata(userId, {
+    await client.users.updateUserMetadata(userIdFromParams, {
       publicMetadata: { role: roleFormatted },
     });
 

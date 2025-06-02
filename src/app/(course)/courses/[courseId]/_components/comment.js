@@ -18,7 +18,7 @@ export const Comment = ({ comment }) => {
               <AvatarImage src={comment.user.image} />
               <AvatarFallback className="bg-slate-400">
                 {" "}
-                {comment.user.name.charAt(0)}
+                {comment?.user?.name?.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <div className="">
