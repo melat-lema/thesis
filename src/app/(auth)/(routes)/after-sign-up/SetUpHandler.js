@@ -23,6 +23,8 @@ export function SetupHandler() {
           throw new Error("Invalid role specified");
         }
 
+        console.log(user.firstName, user.lastName);
+
         // Update Clerk role
         await axios.post("/api/auth/update-role", { role: role.toLowerCase() });
 
@@ -30,7 +32,7 @@ export function SetupHandler() {
         await axios.post("/api/auth/register", {
           clerkId: user.id,
           email: user.primaryEmailAddress?.emailAddress,
-          name: user.fullName,
+          name: user.firstName + " " + user.lastName,
           role: role.toUpperCase(),
         });
 
