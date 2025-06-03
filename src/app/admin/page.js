@@ -18,7 +18,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, DollarSign, Users, CreditCard } from "lucide-react";
+import { MoreVertical, DollarSign, Users, CreditCard, Loader2 } from "lucide-react";
 import { DashboardStatCard } from "@/components/dashboard-stat-card";
 import EarningsBarChart from "@/components/earnings-bar-chart";
 import { useUser } from "@clerk/nextjs";
@@ -35,6 +35,7 @@ export default function AdminDashboard() {
   const [error, setError] = useState(null);
   const [verifying, setVerifying] = useState({});
   const [chartMode, setChartMode] = useState("teacher"); // 'teacher' or 'course'
+  const [deleting, setDeleting] = useState({});
 
   // if (role !== "admin") {
   //   toast.error("You are not authorized to access this page");
@@ -88,6 +89,34 @@ export default function AdminDashboard() {
       alert(err.message || "Failed to update verification");
     } finally {
       setVerifying((v) => ({ ...v, [teacherId]: false }));
+    }
+  };
+
+  const handleDelete = async (id, type) => {
+    if (!confirm(`Are you sure you want to delete this ${type}?`)) {
+      return;
+    }
+
+    setDeleting((prev) => ({ ...prev, [id]: true }));
+    try {
+      const res = await fetch(`/api/admin-dashboard-delete?id=${id}&type=${type}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Failed to delete user");
+
+      // Update the state based on the type
+      if (type === "teacher") {
+        setTeachers((prev) => prev.filter((t) => t.id !== id));
+      } else {
+        setStudents((prev) => prev.filter((s) => s.id !== id));
+      }
+
+      toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully`);
+    } catch (err) {
+      toast.error(err.message || "Failed to delete user");
+    } finally {
+      setDeleting((prev) => ({ ...prev, [id]: false }));
     }
   };
 
@@ -235,7 +264,21 @@ export default function AdminDashboard() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem>View</DropdownMenuItem>
                           <DropdownMenuItem>Edit</DropdownMenuItem>
-                          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+                          <DropdownMenuItem
+                            variant="destructive"
+                            disabled={deleting[teacher.id]}
+                            onClick={() => handleDelete(teacher.id, "teacher")}
+                            className="flex items-center gap-2"
+                          >
+                            {deleting[teacher.id] ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Deleting...
+                              </>
+                            ) : (
+                              "Delete"
+                            )}
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -294,7 +337,21 @@ export default function AdminDashboard() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem>View</DropdownMenuItem>
                           <DropdownMenuItem>Edit</DropdownMenuItem>
-                          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+                          <DropdownMenuItem
+                            variant="destructive"
+                            disabled={deleting[student.id]}
+                            onClick={() => handleDelete(student.id, "student")}
+                            className="flex items-center gap-2"
+                          >
+                            {deleting[student.id] ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Deleting...
+                              </>
+                            ) : (
+                              "Delete"
+                            )}
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
