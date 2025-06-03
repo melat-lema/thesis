@@ -1,4 +1,6 @@
 "use client";
+
+import { useEffect } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -11,6 +13,16 @@ import {
 } from "recharts";
 
 export default function EarningsBarChart({ data, title }) {
+  useEffect(() => {
+    const badData = data.filter(
+      (item) => typeof item.earnings !== "number" || isNaN(item.earnings)
+    );
+    if (badData.length > 0) {
+      console.warn("Invalid earnings entries:", badData);
+    }
+  }, [data]);
+
+  // Handle empty or invalid data early
   if (!Array.isArray(data) || data.length === 0) {
     return (
       <div className="w-full h-[400px] bg-white rounded-xl shadow p-4 flex items-center justify-center">
@@ -18,16 +30,26 @@ export default function EarningsBarChart({ data, title }) {
       </div>
     );
   }
-  console.log("data :", data);
 
-  // Sort data by earnings in descending order
-  const sortedData = [...data].sort((a, b) => b.earnings - a.earnings);
+  // Filter out items with invalid earnings values
+  const sanitizedData = data
+    .filter((item) => typeof item.earnings === "number" && !isNaN(item.earnings))
+    .sort((a, b) => b.earnings - a.earnings);
+
+  // Still no valid earnings after filtering
+  if (sanitizedData.length === 0) {
+    return (
+      <div className="w-full h-[400px] bg-white rounded-xl shadow p-4 flex items-center justify-center">
+        <p className="text-gray-500">No valid earnings data available.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-[400px] bg-white rounded-xl shadow p-4">
       <h3 className="text-lg font-semibold mb-4">{title || "Earnings per Course"}</h3>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={sortedData} margin={{ top: 10, right: 20, left: 0, bottom: 30 }}>
+        <BarChart data={sanitizedData} margin={{ top: 10, right: 20, left: 0, bottom: 30 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis
             dataKey="title"
@@ -39,10 +61,16 @@ export default function EarningsBarChart({ data, title }) {
           />
           <YAxis
             tick={{ fontSize: 12 }}
-            tickFormatter={(value) => `ETB ${value.toLocaleString()}`}
+            tickFormatter={(value) =>
+              typeof value === "number" && !isNaN(value) ? `ETB ${value.toLocaleString()}` : ""
+            }
           />
           <Tooltip
-            formatter={(value) => [`ETB ${Number(value).toLocaleString()}`, "Earnings"]}
+            formatter={(value) =>
+              typeof value === "number" && !isNaN(value)
+                ? [`ETB ${value.toLocaleString()}`, "Earnings"]
+                : ["N/A", "Earnings"]
+            }
             labelFormatter={(label) => `Course: ${label}`}
             contentStyle={{
               backgroundColor: "white",

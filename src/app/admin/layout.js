@@ -13,10 +13,14 @@ import { redirect } from "next/navigation";
 const AdminDashboardLayout = ({ children }) => {
   const { user } = useUser();
   const role = user?.publicMetadata?.role;
-  if (role !== "admin") {
-    toast.error("You are not authorized to access this page");
-    redirect("/");
-  }
+
+  useEffect(() => {
+    if (role !== "admin") {
+      toast.error("You are not authorized to access this page");
+      redirect("/");
+    }
+  }, [role]);
+
   useEffect(() => {
     fetch("/api/auth/status").then((res) => res.json());
   }, []);

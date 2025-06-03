@@ -23,7 +23,7 @@ export function SetupHandler() {
           throw new Error("Invalid role specified");
         }
 
-        console.log(user.id);
+        console.log(user);
 
         // Update Clerk role
         await axios.post("/api/auth/update-role", {
